@@ -1,0 +1,131 @@
+With(
+    {
+        //get the numerical value of Day, Month, and Year for both Start and End Date.
+        Calculation: With(
+            {
+                IsNotBlank: !IsBlank(StartDate) && !IsBlank(EndDate),
+                DayStart: Left(
+                    Text(
+                        StartDate,
+                        "ddmmyyyy"
+                    ),
+                    2
+                ),
+                DayEnd: Left(
+                    Text(
+                        EndDate,
+                        "ddmmyyyy"
+                    ),
+                    2
+                ),
+                MonthStart: Mid(
+                    Text(
+                        StartDate,
+                        "ddmmyyyy"
+                    ),
+                    3,
+                    2
+                ),
+                MonthEnd: Mid(
+                    Text(
+                        EndDate,
+                        "ddmmyyyy"
+                    ),
+                    3,
+                    2
+                ),
+                YearStart: Right(
+                    Text(
+                        StartDate,
+                        "ddmmyyyy"
+                    ),
+                    4
+                ),
+                YearEnd: Right(
+                    Text(
+                        EndDate,
+                        "ddmmyyyy"
+                    ),
+                    4
+                )
+            },
+            If(
+                IsNotBlank,
+                With(
+                    {
+                        //get the years value
+                        YearsValue: If(
+                            (YearStart = YearEnd),
+                            0,
+                            (MonthEnd - MonthStart < 0) || ((MonthStart = MonthEnd) && (DayEnd - DayStart < 0)),
+                            Value(YearEnd - YearStart - 1),
+                            Value(YearEnd - YearStart)
+                        )
+                    },
+                    With(
+                        {
+                            //get the months value
+                            MonthsValue: If(
+                                YearStart = YearEnd,
+                                If(
+                                    (MonthStart = MonthEnd),
+                                    0,
+                                    MonthEnd - MonthStart
+                                ),
+                                If(
+                                    MonthStart = MonthEnd,
+                                    If(
+                                        (DayStart - DayEnd <= 0),
+                                        0,
+                                        12 - Abs(MonthEnd - MonthStart) - 1
+                                    ),
+                                    MonthStart - MonthEnd < 0,
+                                    If(
+                                        (DayStart - DayEnd <= 0),
+                                        MonthEnd - MonthStart,
+                                        Abs(MonthEnd - MonthStart) - 1
+                                    ),
+                                    If(
+                                        (DayStart - DayEnd <= 0),
+                                        12 - Abs(MonthEnd - MonthStart),
+                                        12 - Abs(MonthEnd - MonthStart) - 1
+                                    )
+                                )
+                            )
+                        },
+                        With(
+                            {
+                                //get the days value
+                                DaysValue: If(
+                                    DayStart = DayEnd,
+                                    0,
+                                    DayStart - DayEnd > 0,
+                                    30 - (DayStart-DayEnd),
+                                    DayEnd - DayStart
+                                )
+                            },
+                            If(
+                                YearsValue > 0,
+                                YearsValue & "y"
+                            ) & If(
+                                MonthsValue > 0,
+                                MonthsValue & "m"
+                            ) & If(
+                                DaysValue > 0,
+                                Round(
+                                    DaysValue,
+                                    0
+                                ) & "d"
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    },
+    If(
+        IsBlank(Calculation),
+        "0d",
+        Calculation
+    )
+)
